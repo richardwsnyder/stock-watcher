@@ -1,15 +1,18 @@
 package main
 
 import (
+	"bufio"
 	"database/sql"
 	"encoding/json"
-	"finnhub/src/database"
-	em "finnhub/src/email"
-	en "finnhub/src/env"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
+	"stock-watcher/src/database"
+	em "stock-watcher/src/email"
+	en "stock-watcher/src/env"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -74,11 +77,11 @@ func (s *Stock) insertStock(db *sql.DB) {
 	s.Price = quote["c"].(float64)
 
 	sqlStatement := `
-	INSERT INTO stocks (Symbol, Price)
-	VALUES ($1, $2)
+	INSERT INTO stocks (symbol, price, pricetarget)
+	VALUES ($1, $2, $3)
 	`
 
-	_, err := db.Exec(sqlStatement, s.Symbol, s.Price)
+	_, err := db.Exec(sqlStatement, s.Symbol, s.Price, s.PriceTarget.Float64)
 	if err != nil {
 		panic(err)
 	}
@@ -119,13 +122,7 @@ func watchStock(stock *Stock, db *sql.DB) {
 	}
 }
 
-func main() {
-	db, err := database.Connect(database.Host, database.Port, database.User, database.Password, database.Dbname)
-
-	if err != nil {
-		panic(err)
-	}
-
+func watch(db *sql.DB) {
 	rows, err := db.Query("SELECT symbol, name, price, pricetarget FROM stocks")
 	if err != nil {
 		panic(err)
@@ -152,6 +149,67 @@ func main() {
 
 		go watchStock(&s, db)
 	}
+}
 
-	WaitForCtrlC()
+func insert(db *sql.DB) {
+	fmt.Println("What is the symbol of the stock you want to add?")
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Enter symbol: ")
+	symbol, _ := reader.ReadString('\n')
+	symbol = strings.TrimSuffix(symbol, "\n")
+	fmt.Println("What is the price target of the stock you want to add?")
+	fmt.Print("Enter price target: ")
+	priceString, _ := reader.ReadString('\n')
+	priceString = strings.TrimSuffix(priceString, "\n")
+	priceTarget, _ := strconv.ParseFloat(priceString, 64)
+	s := Stock{
+		Symbol: symbol,
+		PriceTarget: sql.NullFloat64{
+			Float64: priceTarget,
+			Valid:   true,
+		},
+	}
+
+	s.insertStock(db)
+}
+
+func printUsage() {
+	fmt.Print("Usage: ")
+	fmt.Println("./main <action>")
+	fmt.Println("action == watch will begin a server that watches the stocks that are in the database")
+	fmt.Println("action == insert will insert a new stock into the database")
+}
+
+func main() {
+	if len(os.Args) < 2 {
+		printUsage()
+		return
+	}
+
+	db, err := database.Connect(database.Host, database.Port, database.User, database.Password, database.Dbname)
+
+	if err != nil {
+		panic(err)
+	}
+
+	if os.Args[1] == "watch" {
+		watch(db)
+		WaitForCtrlC()
+	} else if os.Args[1] == "insert" {
+		insert(db)
+		for {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Println("Would you like to insert another stock?")
+			fmt.Println("yes or y to insert another stock, anything else to quit")
+			response, _ := reader.ReadString('\n')
+			if response == "yes" || response == "y" {
+				insert(db)
+			} else {
+				fmt.Println("Goodbye!")
+				return
+			}
+		}
+	} else {
+		printUsage()
+	}
 }

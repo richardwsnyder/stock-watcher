@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/smtp"
 
-	e "finnhub/src/env"
+	e "stock-watcher/src/env"
 )
 
 func PriceTargetMet(body string) {
