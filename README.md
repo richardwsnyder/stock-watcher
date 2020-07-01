@@ -26,6 +26,8 @@ TO=send_to (recipient email address)
 ```
 
 ## Database
+I recommend you follow [this](https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e) tutorial on how to create a database and user profile in postgres. The same database that you create with those commands will be the one you put in the `.env` file
+
 The database that you will be using for this project will have a single table: `stocks`. The table columns and types are as follows
 ```
 symbol: VARCHAR(50), NOT NULL, Primary Key
@@ -35,13 +37,21 @@ pricetarget: double precision
 ```
 
 ## Install
-```$ go get github.com/richardwsnyder/stock-watcher```
+```
+$ go get github.com/richardwsnyder/stock-watcher github.com/joho/godotenv github.com/lib/pq
+```
 
 This will place the project in your `$GOPATH` in the `src/github.com` directory. 
 
 ## Usage
+Before you are able to run the executable created below, you must create the `.env` file as described above in the root directory of the project.
 ```
-$ cd $GOPATH/src/github.com/stock-watcher/src/app
+$ cd $GOPATH/src/github.com/stock-watcher
+$ touch .env # this will create a .env file
+```
+Once you have finished editing your `.env` file, you can the move on to building the binary of the project
+```
+$ cd src/app
 $ go build main.go
 $ ./main <action>
 ```
