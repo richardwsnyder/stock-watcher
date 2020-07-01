@@ -8,13 +8,14 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"stock-watcher/src/database"
-	em "stock-watcher/src/email"
-	en "stock-watcher/src/env"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/richardwsnyder/stock-watcher/src/database"
+	em "github.com/richardwsnyder/stock-watcher/src/email"
+	en "github.com/richardwsnyder/stock-watcher/src/env"
 )
 
 var Token = en.GoDotEnvVariable("TOKEN")
@@ -202,6 +203,7 @@ func main() {
 			fmt.Println("Would you like to insert another stock?")
 			fmt.Println("yes or y to insert another stock, anything else to quit")
 			response, _ := reader.ReadString('\n')
+			response = strings.TrimSuffix(response, "\n")
 			if response == "yes" || response == "y" {
 				insert(db)
 			} else {

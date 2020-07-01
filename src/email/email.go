@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/smtp"
 
-	e "stock-watcher/src/env"
+	e "github.com/richardwsnyder/stock-watcher/src/env"
 )
 
 func PriceTargetMet(body string) {

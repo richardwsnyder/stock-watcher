@@ -6,7 +6,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	e "stock-watcher/src/env"
+	e "github.com/richardwsnyder/stock-watcher/src/env"
 )
 
 var (
