@@ -88,6 +88,20 @@ func (s *Stock) insertStock(db *sql.DB) {
 	}
 }
 
+func updatePriceTarget(symbol string, newPriceTaret float64, db *sql.DB) {
+	fmt.Printf("Updating stock %v to new price target %v\n", symbol, newPriceTaret)
+	sqlStatement := `
+	UPDATE stocks
+	SET pricetarget = $1
+	WHERE symbol = $2
+	`
+
+	_, err := db.Exec(sqlStatement, newPriceTaret, symbol)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func watchStock(stock *Stock, db *sql.DB) {
 	fmt.Println("Beginning to watch stock", stock.Symbol)
 	for {
@@ -152,6 +166,14 @@ func watch(db *sql.DB) {
 	}
 }
 
+func getPriceTarget() float64 {
+	priceString, _ := reader.ReadString('\n')
+	priceString = strings.TrimSuffix(priceString, "\n")
+	priceTarget, _ := strconv.ParseFloat(priceString, 64)
+
+	return priceTarget
+}
+
 func insert(db *sql.DB) {
 	fmt.Println("What is the symbol of the stock you want to add?")
 	reader := bufio.NewReader(os.Stdin)
@@ -160,9 +182,7 @@ func insert(db *sql.DB) {
 	symbol = strings.TrimSuffix(symbol, "\n")
 	fmt.Println("What is the price target of the stock you want to add?")
 	fmt.Print("Enter price target: ")
-	priceString, _ := reader.ReadString('\n')
-	priceString = strings.TrimSuffix(priceString, "\n")
-	priceTarget, _ := strconv.ParseFloat(priceString, 64)
+	priceTarget := getPriceTarget()
 	s := Stock{
 		Symbol: symbol,
 		PriceTarget: sql.NullFloat64{
@@ -172,6 +192,18 @@ func insert(db *sql.DB) {
 	}
 
 	s.insertStock(db)
+}
+
+func update(db *sql.DB) {
+	fmt.Println("What is the symbol of the stock you want to update?")
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Enter symbol: ")
+	symbol, _ := reader.ReadString('\n')
+	symbol = strings.TrimSuffix(symbol, "\n")
+	fmt.Printf("What is the new price target you want to update %v to?", symbol)
+	priceTarget := getPriceTarget()
+
+	updatePriceTarget(symbol, priceTarget, db)
 }
 
 func printUsage() {
@@ -206,6 +238,21 @@ func main() {
 			response = strings.TrimSuffix(response, "\n")
 			if response == "yes" || response == "y" {
 				insert(db)
+			} else {
+				fmt.Println("Goodbye!")
+				return
+			}
+		}
+	} else if os.Args[1] == "update" { // TODO: Make the for loop a function
+		update(db)
+		for {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Println("Would you like to update another stock?")
+			fmt.Println("yes or y to insert another stock, anything else to quit")
+			response, _ := reader.ReadString('\n')
+			response = strings.TrimSuffix(response, "\n")
+			if response == "yes" || response == "y" {
+				update(db)
 			} else {
 				fmt.Println("Goodbye!")
 				return
