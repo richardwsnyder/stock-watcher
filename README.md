@@ -69,18 +69,22 @@ Once you have finished editing your `.env` file, you can the move on to building
 ```
 $ cd src/app
 $ go build main.go
-$ ./main <action>
+$ ./main
 ```
 
-`<action>` can either be `watch` or `insert`.
+You will then be prompted to perform an action. The options are as follows
 
-`watch` will watch all of the stocks that you have in your database
+`w` will watch all of the stocks that you have in your database.
 
-`insert` will prompt you to add a new stock. First you will be asked for the stock's symbol. Then you will be asked to provide a price target. 
+`i` will prompt you to add a new stock. First you will be asked for the stock's symbol. Then you will be asked to provide a price target. 
 
-`update` will prompt you to update the price target of a stock in your database
+`u` will prompt you to update the price target of a stock in your database.
 
-`remove` will prompt you to remove a stock from your database
+`r` will prompt you to remove a stock from your database.
+
+`s` will start an http server on port `8080`. This options spawns a goroutine, so you can continue with other options after starting the server.
+
+`q` to quit the program.
 
 ### Heroku vs local database
 The default will be to attempt to connect to a Heroku database. If you are running a lcoal postgres database, uncomment the line

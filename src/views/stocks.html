@@ -1,0 +1,23 @@
+<style>
+    table, th, td {
+        border: 1px solid black;
+    }
+</style>
+
+<h1>{{.PageTitle}}</h1>
+<table style="width:100%">
+    <tr>
+        <th>Symbol</th>
+        <th>Name</th>
+        <th>Current Price</th>
+        <th>Price Target</th>
+    </tr>
+    {{range .Stocks}}
+        <tr>
+            <td>{{.Symbol}}</td>
+            <td>{{.Name.String}}</td>
+            <td>${{.Price}}</td>
+            <td>${{.PriceTarget.Float64}}</td> 
+        </tr>
+    {{end}}
+</table>
