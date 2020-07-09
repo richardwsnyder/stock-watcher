@@ -200,7 +200,7 @@ func insert(db *sql.DB) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter symbol: ")
 	symbol, _ := reader.ReadString('\n')
-	symbol = strings.TrimSuffix(symbol, "\n")
+	symbol = strings.ToUpper(strings.TrimSuffix(symbol, "\n"))
 	fmt.Println("What is the name of the stock you want to add?")
 	fmt.Print("Enter name: ")
 	name, _ := reader.ReadString('\n')
@@ -234,7 +234,7 @@ func update(db *sql.DB) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter symbol: ")
 	symbol, _ := reader.ReadString('\n')
-	symbol = strings.TrimSuffix(symbol, "\n")
+	symbol = strings.ToUpper(strings.TrimSuffix(symbol, "\n"))
 	fmt.Printf("What is the new price target you want to update %v to? ", symbol)
 	priceTarget := getPriceTarget(reader)
 
@@ -246,7 +246,7 @@ func remove(db *sql.DB) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter symbol: ")
 	symbol, _ := reader.ReadString('\n')
-	symbol = strings.TrimSuffix(symbol, "\n")
+	symbol = strings.ToUpper(strings.TrimSuffix(symbol, "\n"))
 
 	removeStock(symbol, db)
 }
@@ -341,7 +341,7 @@ func main() {
 			fmt.Println("Would you like to insert another stock?")
 			fmt.Println("yes or y to insert another stock, anything else to quit")
 			response, _ := reader.ReadString('\n')
-			response = strings.TrimSuffix(response, "\n")
+			response = strings.ToLower(strings.TrimSuffix(response, "\n"))
 			if response == "yes" || response == "y" {
 				insert(db)
 			} else {
@@ -356,7 +356,7 @@ func main() {
 			fmt.Println("Would you like to update another stock?")
 			fmt.Println("yes or y to update another stock, anything else to quit")
 			response, _ := reader.ReadString('\n')
-			response = strings.TrimSuffix(response, "\n")
+			response = strings.ToLower(strings.TrimSuffix(response, "\n"))
 			if response == "yes" || response == "y" {
 				update(db)
 			} else {
@@ -371,7 +371,7 @@ func main() {
 			fmt.Println("Would you like to remove another stock?")
 			fmt.Println("yes or y to remove another stock, anything else to quit")
 			response, _ := reader.ReadString('\n')
-			response = strings.TrimSuffix(response, "\n")
+			response = strings.ToLower(strings.TrimSuffix(response, "\n"))
 			if response == "yes" || response == "y" {
 				remove(db)
 			} else {
@@ -381,6 +381,7 @@ func main() {
 		}
 	} else if os.Args[1] == "server" {
 		server(db)
+		WaitForCtrlC()
 	} else {
 		printUsage()
 	}
