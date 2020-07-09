@@ -17,6 +17,14 @@ var (
 	Dbname   = e.GoDotEnvVariable("DBNAME")
 )
 
+func ConnectHeroku(heroku string) (*sql.DB, error) {
+	db, err := sql.Open("postgres", heroku)
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
+}
+
 func Connect(host string, port int, user string, password string, dbname string) (*sql.DB, error) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",

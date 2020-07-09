@@ -13,11 +13,20 @@ This project uses a postgresql database to store your stock entries. If you don'
 This project utilizes the _free_ finnhub.io api. In order to make requests, you will need a token from the api. Create an account [here](https://finnhub.io), save the token that they give you.
 
 ### Environment file
-This project makes use of a `.env` file to manage all of the secret values. These values include your database and email password, database host, and finnhub token. The `.env` file should look like this:
+This project makes use of a `.env` file to manage all of the secret values. These values include your database and email password, database host, and finnhub token. The `.env` file should look like this if you're running your database on Heroku (explained more below):
 ```
-HOST=host_url (if database is local, use localhost)
+TOKEN=finnhub_token
+EUSER=email_address (email address that the notification will be sent from)
+EPASS=email_password (password of the sending email address)
+TO=send_to (recipient email address)
+HEROKU=heroku_uri
+```
+
+And like this if you're running the instance locally:
+```
+HOST=host_url (probably localhost)
 USER=postgres_username (I'd recommend user postgres)
-PASSWORD=postgres_password
+PASSWORD=user_password
 DBNAME=database_name
 TOKEN=finnhub_token
 EUSER=email_address (email address that the notification will be sent from)
@@ -26,7 +35,14 @@ TO=send_to (recipient email address)
 ```
 
 ## Database
-I recommend you follow [this](https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e) tutorial on how to create a database and user profile in postgres. The same database that you create with those commands will be the one you put in the `.env` file
+
+### Heroku
+An easy method creating a postgres database is using the free `hobby-dev` version of [Heroku Postgres](https://devcenter.heroku.com/articles/heroku-postgresql#using-the-cli). The method `ConnectHeroku` Will utilize the database URI that you created with the heroku app, so place that in your `.env` file.
+
+### Local
+I recommend you follow [this](https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e) tutorial on how to create a database and user profile in postgres to run a local database. The same database that you create with those commands will be the one you put in the `.env` file
+
+### Stocks Table
 
 The database that you will be using for this project will have a single table: `stocks`. The table columns and types are as follows
 ```

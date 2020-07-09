@@ -78,11 +78,11 @@ func (s *Stock) insertStock(db *sql.DB) {
 	s.Price = quote["c"].(float64)
 
 	sqlStatement := `
-	INSERT INTO stocks (symbol, price, pricetarget)
-	VALUES ($1, $2, $3)
+	INSERT INTO stocks (symbol, price, pricetarget, name)
+	VALUES ($1, $2, $3, $4)
 	`
 
-	_, err := db.Exec(sqlStatement, s.Symbol, s.Price, s.PriceTarget.Float64)
+	_, err := db.Exec(sqlStatement, s.Symbol, s.Price, s.PriceTarget.Float64, s.Name)
 	if err != nil {
 		panic(err)
 	}
@@ -193,11 +193,25 @@ func insert(db *sql.DB) {
 	fmt.Print("Enter symbol: ")
 	symbol, _ := reader.ReadString('\n')
 	symbol = strings.TrimSuffix(symbol, "\n")
+	fmt.Println("What is the name of the stock you want to add?")
+	fmt.Print("Enter name: ")
+	name, _ := reader.ReadString('\n')
+	name = strings.TrimSuffix(name, "\n")
+	var valid bool
+	if name != "" {
+		valid = true
+	} else {
+		valid = false
+	}
 	fmt.Println("What is the price target of the stock you want to add?")
 	fmt.Print("Enter price target: ")
 	priceTarget := getPriceTarget(reader)
 	s := Stock{
 		Symbol: symbol,
+		Name: sql.NullString{
+			String: name,
+			Valid:  valid,
+		},
 		PriceTarget: sql.NullFloat64{
 			Float64: priceTarget,
 			Valid:   true,
@@ -244,8 +258,8 @@ func main() {
 		return
 	}
 
-	db, err := database.Connect(database.Host, database.Port, database.User, database.Password, database.Dbname)
-
+	// db, err := database.Connect(database.Host, database.Port, database.User, database.Password, database.Dbname)
+	db, err := database.ConnectHeroku(en.GoDotEnvVariable("HEROKU"))
 	if err != nil {
 		panic(err)
 	}
