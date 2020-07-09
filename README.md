@@ -61,3 +61,7 @@ $ ./main <action>
 `watch` will watch all of the stocks that you have in your database
 
 `insert` will prompt you to add a new stock. First you will be asked for the stock's symbol. Then you will be asked to provide a price target. 
+
+`update` will prompt you to update the price target of a stock in your database
+
+`remove` will prompt you to remove a stock from your database

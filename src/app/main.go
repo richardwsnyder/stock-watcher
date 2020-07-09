@@ -102,6 +102,19 @@ func updatePriceTarget(symbol string, newPriceTaret float64, db *sql.DB) {
 	}
 }
 
+func removeStock(symbol string, db *sql.DB) {
+	fmt.Printf("Removing stock %v\n", symbol)
+	sqlStatement := `
+	DELETE FROM stocks
+	WHERE symbol = $1
+	`
+
+	_, err := db.Exec(sqlStatement, symbol)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func watchStock(stock *Stock, db *sql.DB) {
 	fmt.Println("Beginning to watch stock", stock.Symbol)
 	for {
@@ -166,7 +179,7 @@ func watch(db *sql.DB) {
 	}
 }
 
-func getPriceTarget() float64 {
+func getPriceTarget(reader *bufio.Reader) float64 {
 	priceString, _ := reader.ReadString('\n')
 	priceString = strings.TrimSuffix(priceString, "\n")
 	priceTarget, _ := strconv.ParseFloat(priceString, 64)
@@ -182,7 +195,7 @@ func insert(db *sql.DB) {
 	symbol = strings.TrimSuffix(symbol, "\n")
 	fmt.Println("What is the price target of the stock you want to add?")
 	fmt.Print("Enter price target: ")
-	priceTarget := getPriceTarget()
+	priceTarget := getPriceTarget(reader)
 	s := Stock{
 		Symbol: symbol,
 		PriceTarget: sql.NullFloat64{
@@ -200,10 +213,20 @@ func update(db *sql.DB) {
 	fmt.Print("Enter symbol: ")
 	symbol, _ := reader.ReadString('\n')
 	symbol = strings.TrimSuffix(symbol, "\n")
-	fmt.Printf("What is the new price target you want to update %v to?", symbol)
-	priceTarget := getPriceTarget()
+	fmt.Printf("What is the new price target you want to update %v to? ", symbol)
+	priceTarget := getPriceTarget(reader)
 
 	updatePriceTarget(symbol, priceTarget, db)
+}
+
+func remove(db *sql.DB) {
+	fmt.Println("What is the symbol of the stock you want to remove?")
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Enter symbol: ")
+	symbol, _ := reader.ReadString('\n')
+	symbol = strings.TrimSuffix(symbol, "\n")
+
+	removeStock(symbol, db)
 }
 
 func printUsage() {
@@ -211,6 +234,8 @@ func printUsage() {
 	fmt.Println("./main <action>")
 	fmt.Println("action == watch will begin a server that watches the stocks that are in the database")
 	fmt.Println("action == insert will insert a new stock into the database")
+	fmt.Println("action == update will update a stock's price target to a new value")
+	fmt.Println("action == remove will remove a stock from the database")
 }
 
 func main() {
@@ -248,11 +273,26 @@ func main() {
 		for {
 			reader := bufio.NewReader(os.Stdin)
 			fmt.Println("Would you like to update another stock?")
-			fmt.Println("yes or y to insert another stock, anything else to quit")
+			fmt.Println("yes or y to update another stock, anything else to quit")
 			response, _ := reader.ReadString('\n')
 			response = strings.TrimSuffix(response, "\n")
 			if response == "yes" || response == "y" {
 				update(db)
+			} else {
+				fmt.Println("Goodbye!")
+				return
+			}
+		}
+	} else if os.Args[1] == "remove" {
+		remove(db)
+		for {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Println("Would you like to remove another stock?")
+			fmt.Println("yes or y to remove another stock, anything else to quit")
+			response, _ := reader.ReadString('\n')
+			response = strings.TrimSuffix(response, "\n")
+			if response == "yes" || response == "y" {
+				remove(db)
 			} else {
 				fmt.Println("Goodbye!")
 				return
