@@ -150,6 +150,14 @@ func watchStock(stock *Stock, db *sql.DB) {
 	}
 }
 
+func getPriceTarget(reader *bufio.Reader) float64 {
+	priceString, _ := reader.ReadString('\n')
+	priceString = strings.TrimSuffix(priceString, "\n")
+	priceTarget, _ := strconv.ParseFloat(priceString, 64)
+
+	return priceTarget
+}
+
 func watch(db *sql.DB) {
 	rows, err := db.Query("SELECT symbol, name, price, pricetarget FROM stocks")
 	if err != nil {
@@ -177,14 +185,6 @@ func watch(db *sql.DB) {
 
 		go watchStock(&s, db)
 	}
-}
-
-func getPriceTarget(reader *bufio.Reader) float64 {
-	priceString, _ := reader.ReadString('\n')
-	priceString = strings.TrimSuffix(priceString, "\n")
-	priceTarget, _ := strconv.ParseFloat(priceString, 64)
-
-	return priceTarget
 }
 
 func insert(db *sql.DB) {
