@@ -6,7 +6,7 @@ This project was created to perturb my usage of trading platforms like Robinhood
 ## Prerequisites
 
 ### Postgresql
-This project uses a postgresql database to store your stock entries. If you don't already have a local postgresql installation, you can download it [here](https://www.postgresql.org/download/)
+This project uses a postgresql database to store your stock entries. Details on how to set up a database both locally and remotely are in the [Database](#db) section.
 
 ### finnhub.io
 
@@ -34,7 +34,7 @@ EPASS=email_password (password of the sending email address)
 TO=send_to (recipient email address)
 ```
 
-## Database
+## <a name="db"></a>Database
 
 ### Heroku
 An easy method creating a postgres database is using the free `hobby-dev` version of [Heroku Postgres](https://devcenter.heroku.com/articles/heroku-postgresql#using-the-cli). The method `ConnectHeroku` Will utilize the database URI that you created with the heroku app, so place that in your `.env` file.
@@ -81,3 +81,12 @@ $ ./main <action>
 `update` will prompt you to update the price target of a stock in your database
 
 `remove` will prompt you to remove a stock from your database
+
+### Heroku vs local database
+The default will be to attempt to connect to a Heroku database. If you are running a lcoal postgres database, uncomment the line
+
+`db, err := database.Connect(database.Host, database.Port, database.User, database.Password, database.Dbname)`
+
+And comment out 
+
+`// db, err := database.ConnectHeroku(en.GoDotEnvVariable("HEROKU"))`
