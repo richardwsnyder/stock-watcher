@@ -1,7 +1,7 @@
 # stock-watcher
 
 ## Goals
-This project was created to perturb my usage of trading platforms like Robinhood. This platform will notify me whenever a stock hits a specified price target. With that in place, I can know when to sell a stock without constantly being online watching stocks and their daily movements.
+This project was created to perturb my usage of trading platforms like Robinhood. This platform will notify me whenever a stock hits a specified price target or price floor. With that in place, I can know when to sell or buy a stock without constantly being online watching stocks and their daily movements.
 
 ## Prerequisites
 
@@ -46,7 +46,7 @@ This will place the project in your `$GOPATH` in the `src/github.com` directory.
 ## Usage
 Before you are able to run the executable created below, you must create the `.env` file as described above in the root directory of the project.
 ```
-$ cd $GOPATH/src/github.com/stock-watcher
+$ cd $GOPATH/src/github.com/richardwsnyder/stock-watcher
 $ touch .env # this will create a .env file
 ```
 Once you have finished editing your `.env` file, you can the move on to building the binary of the project
