@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/richardwsnyder/stock-watcher/src/database"
 	em "github.com/richardwsnyder/stock-watcher/src/email"
 	en "github.com/richardwsnyder/stock-watcher/src/env"
@@ -25,6 +28,11 @@ type Stock struct {
 	Name        sql.NullString
 	Price       float64
 	PriceTarget sql.NullFloat64
+}
+
+type StocksPage struct {
+	PageTitle string
+	Stocks    []Stock
 }
 
 func WaitForCtrlC() {
@@ -243,13 +251,72 @@ func remove(db *sql.DB) {
 	removeStock(symbol, db)
 }
 
+func server(db *sql.DB) {
+	r := mux.NewRouter()
+	r.HandleFunc("/", homepage)
+	r.HandleFunc("/stock/{symbol}", individualStock)
+	r.HandleFunc("/stocks", func(w http.ResponseWriter, r *http.Request) {
+		tmpl := template.Must(template.ParseFiles("../views/stock.html"))
+		stocks := allStocks(db)
+		stocksPage := StocksPage{
+			PageTitle: "All Stocks",
+			Stocks:    stocks,
+		}
+		tmpl.Execute(w, stocksPage)
+	})
+	log.Fatal(http.ListenAndServe(":8080", r))
+}
+
+func homepage(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello, you've requested the home page at: %s\n", r.URL.Path)
+}
+
+func allStocks(db *sql.DB) []Stock {
+	rows, err := db.Query("SELECT symbol, name, price, pricetarget FROM stocks ORDER BY price DESC")
+	if err != nil {
+		panic(err)
+	}
+
+	defer rows.Close()
+
+	stocks := []Stock{}
+
+	for rows.Next() {
+		var symbol string
+		var name sql.NullString
+		var price float64
+		var priceTarget sql.NullFloat64
+
+		err = rows.Scan(&symbol, &name, &price, &priceTarget)
+		if err != nil {
+			panic(err)
+		}
+		s := Stock{
+			Symbol:      symbol,
+			Name:        name,
+			Price:       price,
+			PriceTarget: priceTarget,
+		}
+
+		stocks = append(stocks, s)
+	}
+
+	return stocks
+}
+
+func individualStock(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	fmt.Fprintf(w, "This is the stock symbol: %s", vars["symbol"])
+}
+
 func printUsage() {
-	fmt.Print("Usage: ")
+	fmt.Print("Usage for the command line interface: ")
 	fmt.Println("./main <action>")
 	fmt.Println("action == watch will begin a server that watches the stocks that are in the database")
 	fmt.Println("action == insert will insert a new stock into the database")
 	fmt.Println("action == update will update a stock's price target to a new value")
 	fmt.Println("action == remove will remove a stock from the database")
+	fmt.Println("action == server will start an http server")
 }
 
 func main() {
@@ -312,6 +379,8 @@ func main() {
 				return
 			}
 		}
+	} else if os.Args[1] == "server" {
+		server(db)
 	} else {
 		printUsage()
 	}

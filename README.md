@@ -54,7 +54,7 @@ pricetarget: double precision
 
 ## Install
 ```
-$ go get github.com/richardwsnyder/stock-watcher github.com/joho/godotenv github.com/lib/pq
+$ go get github.com/richardwsnyder/stock-watcher github.com/joho/godotenv github.com/lib/pq github.com/gorilla/mux
 ```
 
 This will place the project in your `$GOPATH` in the `src/github.com` directory. 
