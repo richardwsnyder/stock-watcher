@@ -37,10 +37,14 @@ TO=send_to (recipient email address)
 ## <a name="db"></a>Database
 
 ### Heroku
-An easy method creating a postgres database is using the free `hobby-dev` version of [Heroku Postgres](https://devcenter.heroku.com/articles/heroku-postgresql#using-the-cli). The method `ConnectHeroku` Will utilize the database URI that you created with the heroku app, so place that in your `.env` file.
+An easy method to create an always-available postgres database is using the free `hobby-dev` version of [Heroku Postgres](https://devcenter.heroku.com/articles/heroku-postgresql#using-the-cli). The method `ConnectHeroku` will utilize the database URI that you created with the heroku app, so place that in your `.env` file. 
+
+I prefer this method because I can connect to the database from mulitple dev machines that this project is located on.
 
 ### Local
-I recommend you follow [this](https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e) tutorial on how to create a database and user profile in postgres to run a local database. The same database that you create with those commands will be the one you put in the `.env` file
+I recommend you follow [this](https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e) tutorial on how to create a database and user profile in postgres to run a local database. The same database that you create with those commands will be the one you put in the `.env` file.
+
+Again, I prefer using Heroku, but if you desire to have more control over your database, use a local instance.
 
 ### Stocks Table
 
@@ -69,8 +73,10 @@ Once you have finished editing your `.env` file, you can the move on to building
 ```
 $ cd src/app
 $ go build main.go
-$ ./main
+$ ./main <mode>
 ```
+
+`<mode>` can be either `local` or `heroku`, which will define whether or not you're connecting to a local or heroku postgres database.
 
 You will then be prompted to perform an action. The options are as follows
 
@@ -85,12 +91,3 @@ You will then be prompted to perform an action. The options are as follows
 `s` will start an http server on port `8080`. This options spawns a goroutine, so you can continue with other options after starting the server.
 
 `q` to quit the program.
-
-### Heroku vs local database
-The default will be to attempt to connect to a Heroku database. If you are running a lcoal postgres database, uncomment the line
-
-`db, err := database.Connect(database.Host, database.Port, database.User, database.Password, database.Dbname)`
-
-And comment out 
-
-`// db, err := database.ConnectHeroku(en.GoDotEnvVariable("HEROKU"))`
