@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"database/sql"
 	"fmt"
 	"os"
 	"os/signal"
@@ -38,9 +39,18 @@ func printUsage() {
 	fmt.Println(" q will quit the program")
 }
 
+func printCLI() {
+	fmt.Println("Usage: ")
+	fmt.Println("./main local")
+	fmt.Println("OR")
+	fmt.Println("./main heroku")
+	fmt.Println("local will connect to a local postgres database, heroku will connect to a heroku database")
+}
+
 func getInput(reader *bufio.Reader) string {
 	fmt.Println("\nWhat would you like to do?")
-	fmt.Println("Type h for help\n")
+	fmt.Println("Type h for help")
+	fmt.Println()
 
 	response, _ := reader.ReadString('\n')
 	response = strings.ToLower(strings.TrimSuffix(response, "\n"))
@@ -49,10 +59,27 @@ func getInput(reader *bufio.Reader) string {
 }
 
 func main() {
+	if len(os.Args) < 2 {
+		printCLI()
+		return
+	}
+
+	mode := os.Args[1]
+
 	printUsage()
 
-	// db, err := database.Connect(database.Host, database.Port, database.User, database.Password, database.Dbname)
-	db, err := database.ConnectHeroku(en.GoDotEnvVariable("HEROKU"))
+	var db *sql.DB
+	var err error
+
+	if mode == "local" {
+		db, err = database.Connect(database.Host, database.Port, database.User, database.Password, database.Dbname)
+	} else if mode == "heroku" {
+		db, err = database.ConnectHeroku(en.GoDotEnvVariable("HEROKU"))
+	} else {
+		printCLI()
+		return
+	}
+
 	if err != nil {
 		panic(err)
 	}
