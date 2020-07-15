@@ -94,3 +94,24 @@ func Remove(db *sql.DB) {
 
 	st.RemoveStock(symbol, db)
 }
+
+func List(db *sql.DB) {
+	rows, err := db.Query("SELECT symbol, price, pricetarget FROM stocks")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	fmt.Printf("\tSymbol\t|\tPrice\t|\tPrice Target\n")
+	fmt.Println("\t------------------------------------------")
+	for rows.Next() {
+		var symbol string
+		var price float64
+		var pricetarget float64
+
+		err = rows.Scan(&symbol, &price, &pricetarget)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("\t%v\t|\t%.2f\t|\t%.2f\n", symbol, price, pricetarget)
+	}
+}

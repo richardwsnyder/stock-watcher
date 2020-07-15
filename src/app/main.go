@@ -34,6 +34,7 @@ func printUsage() {
 	fmt.Println(" u will update a stock's price target to a new value")
 	fmt.Println(" r will remove a stock from the database")
 	fmt.Println(" s will start an http server")
+	fmt.Println(" l will list all of the stocks you have currently")
 	fmt.Println(" q will quit the program")
 }
 
@@ -65,6 +66,8 @@ func main() {
 			printUsage()
 		case "i":
 			cl.Insert(db)
+		case "l":
+			cl.List(db)
 		case "q":
 			return
 		case "r":
