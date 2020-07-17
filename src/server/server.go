@@ -21,7 +21,11 @@ func Serve(db *sql.DB) {
 	r.HandleFunc("/", homepage)
 	r.HandleFunc("/stock/{symbol}", individualStock)
 	r.HandleFunc("/stocks", func(w http.ResponseWriter, r *http.Request) {
-		tmpl := template.Must(template.ParseFiles("../views/stocks.html"))
+		tpl, err := template.ParseFiles("../views/stocks.html")
+		if err != nil {
+			tpl, err = template.ParseFiles("src/views/stocks.html")
+		}
+		tmpl := template.Must(tpl, err)
 		stocks := allStocks(db)
 		stocksPage := StocksPage{
 			PageTitle: "All Stocks",
@@ -29,6 +33,7 @@ func Serve(db *sql.DB) {
 		}
 		tmpl.Execute(w, stocksPage)
 	})
+	fmt.Println("Starting server on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
